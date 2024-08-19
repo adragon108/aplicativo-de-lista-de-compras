@@ -1,0 +1,99 @@
+
+import tkinter as tk
+from tkinter import messagebox
+
+# Função principal
+def main():
+    root = tk.Tk()
+    root.title("Lista de Compras")
+    root.geometry("400x400")
+    
+    # Chama a função que cria a interface
+    create_interface(root)
+    
+    root.mainloop()
+
+# Executa o aplicativo
+if __name__ == "__main__":
+    main()
+def create_interface(root):
+    # Lista de compras
+    shopping_list = []
+    
+    def add_item():
+        item = entry_item.get()
+        if item:
+            shopping_list.append({"item": item, "bought": False})
+            update_listbox()
+            entry_item.delete(0, tk.END)
+        else:
+            messagebox.showwarning("Aviso", "Digite um item para adicionar.")
+
+    def remove_item():
+        selected_items = listbox.curselection()
+        if selected_items:
+            for index in selected_items[::-1]:
+                del shopping_list[index]
+            update_listbox()
+        else:
+            messagebox.showwarning("Aviso", "Selecione um item para remover.")
+    
+    def mark_item():
+        selected_items = listbox.curselection()
+        if selected_items:
+            for index in selected_items:
+                shopping_list[index]["bought"] = not shopping_list[index]["bought"]
+            update_listbox()
+        else:
+            messagebox.showwarning("Aviso", "Selecione um item para marcar.")
+    
+    def update_listbox():
+        listbox.delete(0, tk.END)
+        for item in shopping_list:
+            status = "[Comprado]" if item["bought"] else "[Pendente]"
+            listbox.insert(tk.END, f"{status} {item['item']}")
+
+    # Entrada de item
+    entry_item = tk.Entry(root, width=30)
+    entry_item.pack(pady=10)
+
+    # Botões de controle
+    frame_buttons = tk.Frame(root)
+    frame_buttons.pack(pady=10)
+    
+    btn_add = tk.Button(frame_buttons, text="Adicionar", command=add_item)
+    btn_add.grid(row=0, column=0, padx=5)
+
+    btn_remove = tk.Button(frame_buttons, text="Remover", command=remove_item)
+    btn_remove.grid(row=0, column=1, padx=5)
+    
+    btn_mark = tk.Button(frame_buttons, text="Marcar", command=mark_item)
+    btn_mark.grid(row=0, column=2, padx=5)
+    
+    # Lista de itens
+    listbox = tk.Listbox(root, selectmode=tk.MULTIPLE, width=50, height=15)
+    listbox.pack(pady=10)
+
+    # Carregar e salvar listas (opcional)
+    # btn_save = tk.Button(root, text="Salvar Lista", command=save_list)
+    # btn_load = tk.Button(root, text="Carregar Lista", command=load_list)
+    # btn_save.pack(pady=5)
+    # btn_load.pack(pady=5)
+import json
+
+def save_list():
+    with open("shopping_list.json", "w") as file:
+        json.dump(shopping_list, file)
+    messagebox.showinfo("Informação", "Lista salva com sucesso.")
+
+def load_list():
+    global shopping_list
+    try:
+        with open("shopping_list.json", "r") as file:
+            shopping_list = json.load(file)
+        update_listbox()
+        messagebox.showinfo("Informação", "Lista carregada com sucesso.")
+    except FileNotFoundError:
+        messagebox.showwarning("Aviso", "Nenhuma lista salva encontrada.")
+if __name__ == "__main__":
+    main()
